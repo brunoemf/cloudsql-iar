@@ -1,6 +1,8 @@
 import subprocess
 import sys
 import json  # Import the json module
+import csv
+import re
 
 # Check if the user provided an organization ID as a command-line argument
 if len(sys.argv) > 1:
@@ -21,9 +23,31 @@ command = [
 # Run the command using subprocess.run()
 result = subprocess.run(command, capture_output=True, text=True)
 
-# Print the output
-print(result.stdout)
+# Create a CSV file
+csv_file = open('sql_instances.csv', 'w', newline='')
+csv_writer = csv.writer(csv_file) 
 
-# Check for errors
-if result.returncode != 0:
-    print(f"Error: {result.stderr}")
+# Write the header row
+csv_writer.writerow(['Project ID', 'Instance Name'])
+
+
+# Parse the JSON output
+sql_instances = json.loads(result.stdout)
+
+# Extract and print instance names
+for asset in sql_instances:
+    project_id = asset['resource']['data']['project']
+    instance_name = asset['resource']['data']['name']
+    tier = asset['resource']['data']['settings']['tier']
+    availabilityType = asset['resource']['data']['settings']['availabilityType']
+    storage_auto_resize = asset['resource']['data']['settings']['storageAutoResize']
+    backup_configuration =
+
+    csv_writer.writerow([project_id, instance_name])
+
+# Close the CSV file
+csv_file.close()
+
+print("SQL instances extracted and saved to sql_instances.csv")
+
+

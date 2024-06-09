@@ -1,33 +1,68 @@
-# metrics_collector.py
 import subprocess
 import json
+import time
 
-def collect_instance_metrics(instance_name, instance_region):
-    """Collects metrics for a given Cloud SQL instance.
+def list_time_series_aggregate(project_id: str):
+    """Prints aggregated CPU utilization metric for last hour
 
     Args:
-        instance_name: The name of the Cloud SQL instance.
-        instance_region: The region of the Cloud SQL instance.
+        project_id: Google Cloud project id
 
     Returns:
-        A dictionary containing the collected metrics.
+        Collection of time series.
+        Iterating over this object will yield results and resolve additional pages automatically.
     """
-    metrics = {}
-    for metric_name in ['cpuUsage', 'diskUsage', 'memoryUsage', 'connections']:
-        command = [
-            'gcloud', 'sql', 'operations', 'list',
-            '--filter', f'target.name="{instance_name}"',
-            '--region', instance_region,
-            '--format', 'json'
-        ]
-        result = subprocess.run(command, capture_output=True, text=True)
-        try:
-            operations = json.loads(result.stdout)
-            for operation in operations:
-                if 'performance' in operation and metric_name in operation['performance']:
-                    metrics[f'performance.{metric_name}'] = operation['performance'][metric_name]
-                    break
-        except (json.JSONDecodeError, KeyError):
-            metrics[f'performance.{metric_name}'] = None
-    return metrics
+    # [START monitoring_read_timeseries_align]
+    from google.cloud import monitoring_v3
 
+    client = monitoring_v3.MetricServiceClient()
+    project_name = f"projects/{project_id}"
+
+    now = time.time()
+    seconds = int(now)
+    nanos = int((now - seconds) * 10**9)
+    interval = monitoring_v3.TimeInterval(
+        {
+            "end_time": {"seconds": seconds, "nanos": nanos},
+            "start_time": {"seconds": (seconds - 3600), "nanos": nanos},
+        }
+    )
+    aggregation = monitoring_v3.Aggregation(
+        {
+            "alignment_period": {"seconds": 3600},  # 20 minutes
+            "per_series_aligner": monitoring_v3.Aggregation.Aligner.ALIGN_MEAN,
+        }
+    )
+
+    results = client.list_time_series(
+        request={
+            "name": project_name,
+            "filter": 'metric.type = "compute.googleapis.com/instance/cpu/utilization"',
+            "interval": interval,
+            "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+            "aggregation": aggregation,
+        }
+    )
+    # Manipulating the time series object
+    for result in results:
+        # Accessing the points
+        for point in result.points:
+            # Accessing the value
+            value = point.value.double_value
+            '''
+            # Accessing the timestamp
+            timestamp = point.interval.end_time
+            # Formatting the timestamp
+            formatted_timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp.seconds))
+            '''
+            print(f"CPU Usage: {value}")
+    # [END monitoring_read_timeseries_align]
+    return results
+
+# Example usage
+instance_name = 'run-lab-instance'
+instance_region = 'us-central1'
+project_id = 'tonal-land-379520'  # Replace with your project ID
+
+metrics = list_time_series_aggregate(project_id)
+#print(metrics)

@@ -1,8 +1,10 @@
 # data_parser.py
 import json
 import csv
+from functions.get_sql_instances import get_sql_instances
 
-def parse_sql_instances(json_file, csv_file):
+
+def parse_sql_instances(org_id, csv_file):
     """Parses a JSON file containing Cloud SQL instances and writes data to a CSV file.
 
     Args:
@@ -10,8 +12,8 @@ def parse_sql_instances(json_file, csv_file):
         csv_file: Path to the CSV file to write data to.
     """
 
-    with open(json_file, 'r') as f:
-        sql_instances = json.load(f)
+    sql_instances = get_sql_instances(org_id)
+
 
     with open(csv_file, 'w', newline='') as csvfile:
         # Define the fieldnames for the CSV file

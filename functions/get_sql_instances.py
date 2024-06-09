@@ -3,6 +3,15 @@ import subprocess
 import json
 
 def get_sql_instances(org_id):
+    #generate a description of this funcion
+    """Retrieves a list of Cloud SQL instances for a given organization.
+
+    Args:
+        org_id: The organization ID.
+
+    Returns:
+        A list of Cloud SQL instance objects.
+    """
     
     command = [
         'gcloud', 'asset', 'list', 

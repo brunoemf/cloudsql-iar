@@ -1,3 +1,4 @@
+# data_parser.py
 import json
 import csv
 
@@ -115,7 +116,3 @@ def get_nested_value(data, key):
             return None
     return data
 
-# Example usage
-json_file = '/Users/brunoemf/Documents/workspace/cloudsql-iar/sql-instances.json'
-csv_file = 'output.csv'
-parse_sql_instances(json_file, csv_file)

@@ -29,7 +29,7 @@ def list_time_series_aggregate(project_id: str):
     )
     aggregation = monitoring_v3.Aggregation(
         {
-            "alignment_period": {"seconds": 3600},  # 20 minutes
+            "alignment_period": {"seconds": 3600}, 
             "per_series_aligner": monitoring_v3.Aggregation.Aligner.ALIGN_MEAN,
         }
     )
@@ -37,7 +37,7 @@ def list_time_series_aggregate(project_id: str):
     results = client.list_time_series(
         request={
             "name": project_name,
-            "filter": 'metric.type = "compute.googleapis.com/instance/cpu/utilization"',
+            "filter": 'metric.type = "cloudsql.googleapis.com/database/cpu/utilization" AND resource.labels.database_id = "tonal-land-379520:run-lab-instance"',
             "interval": interval,
             "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
             "aggregation": aggregation,
@@ -55,7 +55,8 @@ def list_time_series_aggregate(project_id: str):
             # Formatting the timestamp
             formatted_timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp.seconds))
             '''
-            print(f"CPU Usage: {value}")
+            #print(f"CPU Usage: {value}")
+        print(result)
     # [END monitoring_read_timeseries_align]
     return results
 

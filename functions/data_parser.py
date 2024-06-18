@@ -2,7 +2,7 @@
 import json
 import csv
 from functions.get_sql_instances import get_sql_instances
-
+from functions.metrics_collector import list_time_series_aggregate as metric
 
 def parse_sql_instances(org_id, csv_file):
     """Parses a JSON file containing Cloud SQL instances and writes data to a CSV file.
@@ -86,7 +86,8 @@ def parse_sql_instances(org_id, csv_file):
             'resource.location',
             'resource.parent',
             'resource.version',
-            'updateTime'
+            'updateTime',
+            'cpu_utilization'
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
@@ -98,6 +99,8 @@ def parse_sql_instances(org_id, csv_file):
                 # Use get() to handle missing keys and return NULL
                 value = get_nested_value(instance, fieldname)
                 instance_data[fieldname] = value
+            instance_data['cpu_utilization'] = metric(instance['resource']['data']['project'],instance['resource']['data']['name'])
+            
             writer.writerow(instance_data)
 
 def get_nested_value(data, key):

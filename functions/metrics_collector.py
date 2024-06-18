@@ -2,15 +2,14 @@ import subprocess
 import json
 import time
 
-def list_time_series_aggregate(project_id: str):
-    """Prints aggregated CPU utilization metric for last hour
+def list_time_series_aggregate(project_id: str, instance_name: str):
+    """Prints aggregated CPU utilization metric for last 72 hours
 
     Args:
         project_id: Google Cloud project id
-
+        instance_name: Google Cloud SQL instance id
     Returns:
-        Collection of time series.
-        Iterating over this object will yield results and resolve additional pages automatically.
+        Mean of the CPU Utilization
     """
     # [START monitoring_read_timeseries_align]
     from google.cloud import monitoring_v3
@@ -24,7 +23,7 @@ def list_time_series_aggregate(project_id: str):
     interval = monitoring_v3.TimeInterval(
         {
             "end_time": {"seconds": seconds, "nanos": nanos},
-            "start_time": {"seconds": (seconds - 3600), "nanos": nanos},
+            "start_time": {"seconds": (seconds - 259200), "nanos": nanos},
         }
     )
     aggregation = monitoring_v3.Aggregation(
@@ -37,7 +36,8 @@ def list_time_series_aggregate(project_id: str):
     results = client.list_time_series(
         request={
             "name": project_name,
-            "filter": 'metric.type = "cloudsql.googleapis.com/database/cpu/utilization" AND resource.labels.database_id = "tonal-land-379520:run-lab-instance"',
+            #"filter": 'metric.type = "cloudsql.googleapis.com/database/cpu/utilization" AND resource.labels.database_id = "tonal-land-379520:run-lab-instance"',
+            "filter": f'metric.type = "cloudsql.googleapis.com/database/cpu/utilization" AND resource.labels.database_id = "{project_id}:{instance_name}"',
             "interval": interval,
             "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
             "aggregation": aggregation,
@@ -56,14 +56,14 @@ def list_time_series_aggregate(project_id: str):
             formatted_timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp.seconds))
             '''
             #print(f"CPU Usage: {value}")
-        print(result)
+        #print(result)
     # [END monitoring_read_timeseries_align]
-    return results
+    return value
 
 # Example usage
-instance_name = 'run-lab-instance'
+sql_instance = 'run-lab-instance'
 instance_region = 'us-central1'
 project_id = 'tonal-land-379520'  # Replace with your project ID
 
-metrics = list_time_series_aggregate(project_id)
+#metrics = list_time_series_aggregate(project_id,sql_instance)
 #print(metrics)

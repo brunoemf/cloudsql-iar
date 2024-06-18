@@ -2,7 +2,10 @@
 import json
 import csv
 from functions.get_sql_instances import get_sql_instances
-from functions.metrics_collector import list_time_series_aggregate as metric
+from functions.metrics_collector import get_cpu_utilization as metric_cpu
+from functions.metrics_collector import get_ram_utilization as metric_ram
+from functions.metrics_collector import get_storage_utilization as storage_utilization
+
 
 def parse_sql_instances(org_id, csv_file):
     """Parses a JSON file containing Cloud SQL instances and writes data to a CSV file.
@@ -87,7 +90,9 @@ def parse_sql_instances(org_id, csv_file):
             'resource.parent',
             'resource.version',
             'updateTime',
-            'cpu_utilization'
+            'cpu_utilization',
+            'ram_total_usage',
+            'storage_utilization'
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
@@ -99,8 +104,9 @@ def parse_sql_instances(org_id, csv_file):
                 # Use get() to handle missing keys and return NULL
                 value = get_nested_value(instance, fieldname)
                 instance_data[fieldname] = value
-            instance_data['cpu_utilization'] = metric(instance['resource']['data']['project'],instance['resource']['data']['name'])
-            
+            instance_data['cpu_utilization'] = metric_cpu(instance['resource']['data']['project'],instance['resource']['data']['name'])
+            instance_data['ram_total_usage'] = bytes_to_gigabytes(metric_ram(instance['resource']['data']['project'],instance['resource']['data']['name']))
+            instance_data['storage_utilization'] = bytes_to_gigabytes(storage_utilization(instance['resource']['data']['project'],instance['resource']['data']['name']))
             writer.writerow(instance_data)
 
 def get_nested_value(data, key):
@@ -120,4 +126,15 @@ def get_nested_value(data, key):
         else:
             return None
     return data
+
+def bytes_to_gigabytes(bytes):
+  """Converts bytes to gigabytes.
+
+  Args:
+    bytes: The number of bytes to convert.
+
+  Returns:
+    The number of gigabytes.
+  """
+  return bytes / (1024 ** 3)
 

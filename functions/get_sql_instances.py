@@ -28,6 +28,4 @@ def get_sql_instances(org_id):
     
     return sql_instances 
 
-# Teste
-#teste = get_sql_instances('677188344232')  
-#print(teste)
+

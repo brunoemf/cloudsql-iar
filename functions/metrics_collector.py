@@ -174,10 +174,4 @@ def get_storage_utilization(project_id: str, instance_name: str):
     return value
 
 
-# Example usage
-sql_instance = 'run-lab-instance'
-instance_region = 'us-central1'
-project_id = 'tonal-land-379520'  # Replace with your project ID
 
-#metrics = list_time_series_aggregate(project_id,sql_instance)
-#print(metrics)

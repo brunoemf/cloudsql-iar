@@ -11,6 +11,8 @@ def get_cpu_utilization(project_id: str, instance_name: str):
     Returns:
         Mean of the CPU Utilization
     """
+
+    print('collecting cpu usage')
     # [START monitoring_read_timeseries_align]
     from google.cloud import monitoring_v3
 

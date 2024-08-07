@@ -18,6 +18,6 @@ if __name__ == "__main__":
     parser.add_argument("org_id", help="Pass the Organization ID to list Cloud SQL instances")
     parser.add_argument("csv_file", help="Path to the CSV file to export data to")
     args = parser.parse_args()
-
+    print('Calling Main....')
     parse_sql_instances(args.org_id, args.csv_file)
 

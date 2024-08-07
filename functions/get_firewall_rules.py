@@ -2,7 +2,7 @@
 import subprocess
 import json
 
-def get_sql_instances(org_id):
+def get_firewall_rules(org_id: str):
     #generate a description of this funcion
     """Retrieves a list of Cloud SQL instances for a given organization.
 
@@ -16,7 +16,7 @@ def get_sql_instances(org_id):
     command = [
         'gcloud', 'asset', 'list', 
         '--organization', org_id,
-        '--asset-types', 'sqladmin.googleapis.com/Instance',
+        '--asset-types', 'compute.googleapis.com/Firewall',
         '--content-type', 'resource',
         '--format', 'json'
     ]
@@ -24,8 +24,11 @@ def get_sql_instances(org_id):
     result = subprocess.run(command, capture_output=True, text=True)
     
     print(result.stderr)
-    sql_instances = json.loads(result.stdout)
+    firewall_rules = json.loads(result.stdout)
     
-    return sql_instances 
+    return firewall_rules
 
-
+fw = get_firewall_rules('806711562222') 
+#print(fw)
+for rule in fw:
+    print(rule['resource']['data']['allowed'])

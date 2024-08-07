@@ -14,9 +14,10 @@ def parse_sql_instances(org_id, csv_file):
         json_file: Path to the JSON file.
         csv_file: Path to the CSV file to write data to.
     """
-
+    print('parse-sql-instances')
     sql_instances = get_sql_instances(org_id)
-
+    print(sql_instances)
+        
 
     with open(csv_file, 'w', newline='') as csvfile:
         # Define the fieldnames for the CSV file
@@ -82,6 +83,7 @@ def parse_sql_instances(org_id, csv_file):
             'resource.data.settings.storageAutoResize',
             'resource.data.settings.storageAutoResizeLimit',
             'resource.data.settings.tier',
+            'resource.data.settings.databaseFlags',
             'resource.data.sqlNetworkArchitecture',
             'resource.data.state',
             'resource.discoveryDocumentUri',
@@ -97,8 +99,10 @@ def parse_sql_instances(org_id, csv_file):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
+        print('writing csv header...')
         for instance in sql_instances:
             # Extract relevant data from the instance object
+            print('Extract relevant data from the instance object')
             instance_data = {}
             for fieldname in fieldnames:
                 # Use get() to handle missing keys and return NULL
